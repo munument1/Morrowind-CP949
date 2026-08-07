@@ -19,13 +19,25 @@ Classic **The Elder Scrolls III: Morrowind 1.6.0.1820**에서 한국어를 표�
 | 전체 translated scripted `Say` 128개 | ✅ 빌드/정적 검증 PASS |
 | 최종 배포판 | 🚧 RC |
 
-## 다운로드
+## 현재 배포 방식
 
-현재 Classic 시험판:
+현재 저장소에는 Bethesda 실행 파일, 게임 원본 ESM, 폰트 바이너리를 올리지 않습니다. Classic RC4 패키지는 [`tools/build_classic_cp949_rc4.py`](tools/build_classic_cp949_rc4.py)로 **사용자가 소유한 GOTY 마스터 파일에서 재현 가능**하게 만들었습니다.
 
-[`Morrowind_Korean_ReTranslation_v1.0.7-rc4_Classic_CP949_MO2.zip`](dist/Morrowind_Korean_ReTranslation_v1.0.7-rc4_Classic_CP949_MO2.zip)
+런타임 회귀 테스트가 끝나면 사전 빌드 MO2 ZIP도 GitHub Releases에 게시하는 것을 목표로 합니다.
 
-이 ZIP에는 **ESP / MRK / README만** 들어 있습니다. `Morrowind.exe`와 폰트 바이너리는 포함하지 않습니다.
+현재 정적 검증을 통과한 테스트 산출물의 파일명은 다음과 같습니다.
+
+```text
+Morrowind_Korean_ReTranslation_v1.0.7-rc4_Classic_CP949_MO2.zip
+```
+
+결정적(deterministic) ZIP SHA-256:
+
+```text
+1905b245c7d926cdc645dd0b369e4c56620119819ccee58251ee61b92f6e4aaa
+```
+
+이 ZIP에는 **ESP / MRK / README만** 들어가며 `Morrowind.exe`와 폰트 바이너리는 포함하지 않습니다.
 
 ## 기준 번역
 
@@ -56,11 +68,11 @@ c83299ebc70877b61b945a5124c5b224eb758c1fdde32e4f97a3b2434bde2fa1
 - translated scripted `Say` **128개**
 - 출력 SCPT에는 `SCDT`만 유지하고 `SCTX`는 제거하여 소스 재컴파일 경고 방지
 - `GetPCCell` 같은 기술용 ID/셀명은 공식 마스터 값을 유지
-- RC4 `.mrk` 387행을 CP949로 변환하여 동봉
+- RC4 `.mrk` 387행을 CP949로 변환
 
 ### 마스터 스크립트 우선순위
 
-스크립트는 반드시 실제 게임 로드 순서와 같은
+스크립트는 실제 게임 로드 순서와 같은
 
 ```text
 Morrowind.esm -> Tribunal.esm -> Bloodmoon.esm
@@ -76,6 +88,37 @@ Morrowind.esm -> Tribunal.esm -> Bloodmoon.esm
 - `CavernIncarnateDoor` -> Bloodmoon 최종 정의
 - `VampireCheck` -> Bloodmoon 최종 정의
 
+## 재현 빌드
+
+필요한 입력:
+
+- `v1.0.7-rc4 MANUAL TOPIC CLOSURE` ZIP
+- 사용자가 소유한 `Morrowind.esm`
+- `Tribunal.esm`
+- `Bloodmoon.esm`
+- Python 3
+
+예시:
+
+```bash
+python tools/build_classic_cp949_rc4.py \
+  --rc4 Morrowind_Korean_ReTranslation_v1.0.7-rc4_OpenMW_0.51.0_MANUAL_TOPIC_CLOSURE.zip \
+  --morrowind Morrowind.esm \
+  --tribunal Tribunal.esm \
+  --bloodmoon Bloodmoon.esm \
+  --output-dir build
+```
+
+검증에 사용한 마스터 SHA-256:
+
+```text
+5c3c8c2cbd20e25901b59b3ece33d36b7ef0e3d60ad8d11828bcc61a5ead1647  Morrowind.esm
+2ace511f23cc2a9ddd5f3aa59c7919789b9378cf4b17c8ae3375dd6b782f3f2b  Tribunal.esm
+bd27090d0e6ad4c1bf1abc83f1a2dac56fcc82cae7bfe8263c413fb301801357  Bloodmoon.esm
+```
+
+동일한 입력으로 빌더를 반복 실행해 ESP, MRK 및 ZIP 해시가 재현되는 것을 확인했습니다.
+
 ## 왜 CP949인가?
 
 Classic Morrowind는 UTF-8/Unicode 기반 게임이 아닙니다. 기존 OpenMW용 한국어 번역은 레거시 `.fnt` 글리프를 조합하는 별도 바이트 표현을 사용하므로 Classic 엔진에 그대로 넣을 수 없습니다.
@@ -84,9 +127,7 @@ Classic Morrowind는 UTF-8/Unicode 기반 게임이 아닙니다. 기존 OpenMW�
 
 패처:
 
-```text
-tools/patch_morrowind_cp949.py
-```
+[`tools/patch_morrowind_cp949.py`](tools/patch_morrowind_cp949.py)
 
 지원 입력 SHA-256:
 
@@ -101,24 +142,24 @@ c3585b91741689057c18ff86a1c3381d47278cd1d81443d38ed3b179c2fa1cd8  MCP Japanese l
 710196b98d1a4efa174aebb5539e14b36cff20d008dc1f0c0610ce099d06cf72
 ```
 
-## 설치 개요
-
-1. Morrowind GOTY 1.6.0.1820과 `Morrowind.esm`, `Tribunal.esm`, `Bloodmoon.esm`을 준비합니다.
-2. 지원되는 MCP 상태의 자신의 `Morrowind.exe`에 `tools/patch_morrowind_cp949.py`를 적용합니다.
-3. Classic Morrowind에서 CP949를 표시할 수 있는 호환 폰트 구성을 준비합니다. **이 저장소는 폰트 바이너리를 배포하지 않습니다.**
-4. `dist/`의 MO2 ZIP을 설치합니다.
-5. `Morrowind_Korean_ReTranslation_v1.0.7-rc4_Classic_CP949.esp`를 활성화합니다.
-6. 이전 한국어 번역 ESP 시험판은 비활성화합니다.
-
-예시:
+실행 파일 패치 예시:
 
 ```bash
 python tools/patch_morrowind_cp949.py Morrowind.exe Morrowind.MCP-Korean-Pilot.exe
 ```
 
-## scripted `Say`와 `MessageBox`
+## 설치 개요
 
-Morrowind의 모든 표시 문자열이 `DIAL / INFO`에 있는 것은 아닙니다. 시작 시 지웁과 경비병의 음성 자막은 MWScript의 `Say` 안에 들어 있고, 튜토리얼 문구 등은 `MessageBox`에 들어 있습니다.
+1. Morrowind GOTY 1.6.0.1820과 `Morrowind.esm`, `Tribunal.esm`, `Bloodmoon.esm`을 준비합니다.
+2. 지원되는 MCP 상태의 자신의 `Morrowind.exe`에 `tools/patch_morrowind_cp949.py`를 적용합니다.
+3. Classic Morrowind에서 CP949를 표시할 수 있는 호환 폰트 구성을 준비합니다. **이 저장소는 폰트 바이너리를 배포하지 않습니다.**
+4. 빌더로 생성한 MO2 ZIP을 설치합니다.
+5. `Morrowind_Korean_ReTranslation_v1.0.7-rc4_Classic_CP949.esp`를 활성화합니다.
+6. 이전 한국어 번역 ESP 시험판은 비활성화합니다.
+
+## scripted `Say`, `MessageBox`, `AddTopic`
+
+Morrowind의 모든 표시 문자열이 `DIAL / INFO`에 있는 것은 아닙니다. 시작 시 지웁과 경비병의 음성 자막은 MWScript의 `Say` 안에 들어 있고, 튜토리얼 문구 등은 `MessageBox`, 일부 토픽 해금은 `AddTopic`에 들어 있습니다.
 
 Classic에서 번역 `SCTX`를 그대로 넣으면 게임이 로드할 때 스크립트를 재컴파일하며 경고가 발생할 수 있습니다. 이 프로젝트는 공식 마스터의 compiled bytecode에서 문자열 인수만 교체합니다.
 
@@ -175,10 +216,10 @@ Classic MRK:
 60be56aff5bd7954e062df812a367be679a924907d8e45620c9a46de97787fe4
 ```
 
-MO2 ZIP:
+Deterministic MO2 ZIP:
 
 ```text
-088bb9e8076c49ae7380a037f4c861f8cf45baa2bd9c13861a870c0e5ae6c55a
+1905b245c7d926cdc645dd0b369e4c56620119819ccee58251ee61b92f6e4aaa
 ```
 
 자세한 정적 검증 결과는 [`validation/`](validation/)을 참고하세요.
