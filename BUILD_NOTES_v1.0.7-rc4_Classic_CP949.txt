@@ -1,0 +1,26 @@
+BUILD NOTES — Morrowind_Korean_ReTranslation_v1.0.7-rc4_Classic_CP949
+
+RC4 source ZIP SHA-256:
+49aa8c70b518539b0f8519a09940cda305187f4205677e4e8d2efdd526e5511c
+
+Classic ESP SHA-256:
+c8078451320dbe77c87463d7ead3a8f3b929ba5cc8460ee4a83cd9d8af8314c3
+
+Master resolution:
+Morrowind.esm -> Tribunal.esm -> Bloodmoon.esm, last script definition wins.
+
+All 236 unique translated script sources match the final official master logic
+after normalizing only user-visible MessageBox, Say, AddTopic strings and known
+GetPCCell technical literals.
+
+Expansion overrides preserved:
+- CharGen_ring_keley -> Tribunal.esm
+- CavernIncarnateDoor -> Bloodmoon.esm
+- VampireCheck -> Bloodmoon.esm
+
+RC4 contains 238 SCPT records but 236 unique names because dbattackScript and
+dbattackScriptOLD each occur twice. Their later duplicates only localize a
+technical Seyda Neen GetPCCell string, so Classic output emits one master-correct
+compiled record per unique script.
+
+No font binary and no Morrowind.exe binary is included.
