@@ -1,0 +1,72 @@
+name: Create RC4 Classic CP949 pre-release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/create-rc4-prerelease.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create pre-release if missing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const tag = 'v1.0.7-rc4-classic-cp949-pre1';
+            const name = 'Morrowind Classic CP949 v1.0.7-rc4 Pre-release';
+            const body = `RC4 MANUAL TOPIC CLOSURE 기반 Classic Morrowind CP949 시험판입니다.
+
+정적 검증은 PASS했으며, CP949 출력과 기존 compiled Say 방식은 게임 내 작동을 확인했습니다. 이번 전체 통합판은 아직 전체 회귀 테스트 전입니다.
+
+### 포함 내용
+- compiled SCPT 236개
+- MessageBox 본문 413개 / 버튼 359개
+- AddTopic 105개
+- scripted Say 128개
+- RC4 MRK 387행
+- FNAM 32바이트 초과 33건 Classic 호환 처리
+- Voice INFO ANAM=\"Wilderness\" 문제 조건 제거
+- 프로케수스 중복 INFO 수정 유지
+
+### 권장 회귀 테스트
+- 새 게임 시작부 지웁/경비병 Say 자막
+- 시작부 MessageBox 및 버튼
+- 흐리스카르 관련 토픽
+- 프로케수스 비텔리우스 살해 토픽
+- 전사 길드 / 마법사 길드 토픽
+- 대장 찾기 관련 토픽
+- Tribunal / Bloodmoon scripted dialogue / AddTopic
+
+### SHA-256
+- ESP: \`c8078451320dbe77c87463d7ead3a8f3b929ba5cc8460ee4a83cd9d8af8314c3\`
+- MRK: \`60be56aff5bd7954e062df812a367be679a924907d8e45620c9a46de97787fe4\`
+- MO2 ZIP: \`1905b245c7d926cdc645dd0b369e4c56620119819ccee58251ee61b92f6e4aaa\`
+
+MO2 ZIP asset은 별도로 첨부하세요.`;
+
+            try {
+              const existing = await github.rest.repos.getReleaseByTag({ owner, repo, tag });
+              core.info(`Release already exists: ${existing.data.html_url}`);
+            } catch (e) {
+              if (e.status !== 404) throw e;
+              const rel = await github.rest.repos.createRelease({
+                owner,
+                repo,
+                tag_name: tag,
+                target_commitish: 'main',
+                name,
+                body,
+                draft: false,
+                prerelease: true,
+                generate_release_notes: false
+              });
+              core.info(`Created: ${rel.data.html_url}`);
+            }
