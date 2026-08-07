@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "source": {
+    "rc6_zip_sha256": "9bfe99f9e296c692ba15cee9540cc9de193d49dad6b5421a31a642da62c237f4",
+    "rc6_esp_sha256": "26da6c578d7136eb0e12f63d4e2d326cef2c10d7e4a148684c65136f753052e2",
+    "rc6_mrk_sha256": "030bb6acb37f1d5718d0af7c4c49367f596dc95e7f75805113a5707bb69b675f"
+  },
+  "independent_rc4_to_rc6_diff": {
+    "record_count_rc4": 48143,
+    "record_count_rc6": 48143,
+    "changed_records": 29,
+    "changed_types": {
+      "INFO": 29
+    },
+    "all_changes_INFO_NAME_only": true,
+    "SCPT_record_count": 238,
+    "SCPT_byte_identical_to_rc4": true,
+    "CELL": 0,
+    "PGRD": 0
+  },
+  "mrk_audit": {
+    "rows": 373,
+    "malformed_rows": 0,
+    "ctrl_z_0x1A_count": 0,
+    "duplicate_topic_keys": 0,
+    "duplicate_keyword_values": 0,
+    "missing_current_DIAL_keys": 0,
+    "stale_keywords": 0
+  },
+  "unsafe13_direct_closure": {
+    "topics": 13,
+    "INFO_rows": 26,
+    "all_26_csv_new_responses_match_actual_ESP": true,
+    "all_13_exact_DIAL_phrases_present_in_target_responses": true,
+    "unsafe_topics_present_in_MRK": []
+  },
+  "processus_invariant": {
+    "INFO_INAM": "14173191683162810366",
+    "occurrences": 1,
+    "ANAM_values": [
+      "Seyda Neen, Census and Excise Office"
+    ]
+  },
+  "runtime_claims_from_bundled_audit_not_independently_replayed_here": [
+    "금화 되찾기 링크",
+    "파르고스의 은닉처 링크/후속 선택지",
+    "그가 화내는 -> 그가 화내는 걸 봤다 링크"
+  ],
+  "note": "Static audit only; gameplay runtime assertions are carried from the supplied RC6 audit and the user’s reported tests, not re-executed by this validator."
+}
