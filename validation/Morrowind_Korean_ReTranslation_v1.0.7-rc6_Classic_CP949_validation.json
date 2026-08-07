@@ -1,0 +1,84 @@
+{
+  "status": "PASS",
+  "runtime_status": "UNTESTED_RC6_CLASSIC_FULL_COMPILED_BUILD; RC6 OpenMW topic samples and earlier Classic CP949 rendering/compiled-Say pilot were runtime-confirmed",
+  "source": {
+    "rc6_zip_sha256": "9bfe99f9e296c692ba15cee9540cc9de193d49dad6b5421a31a642da62c237f4",
+    "rc6_esp_sha256": "26da6c578d7136eb0e12f63d4e2d326cef2c10d7e4a148684c65136f753052e2",
+    "morrowind_esm_sha256": "5c3c8c2cbd20e25901b59b3ece33d36b7ef0e3d60ad8d11828bcc61a5ead1647",
+    "tribunal_esm_sha256": "2ace511f23cc2a9ddd5f3aa59c7919789b9378cf4b17c8ae3375dd6b782f3f2b",
+    "bloodmoon_esm_sha256": "bd27090d0e6ad4c1bf1abc83f1a2dac56fcc82cae7bfe8263c413fb301801357"
+  },
+  "output": {
+    "esp": "Morrowind_Korean_ReTranslation_v1.0.7-rc6_Classic_CP949.esp",
+    "esp_sha256": "d876e2fd60b84380a3bca4750033ac6a36f776e173f5f2476433c66e519a9762",
+    "esp_size": 15971383,
+    "mrk": "Morrowind_Korean_ReTranslation_v1.0.7-rc6_Classic_CP949.mrk",
+    "mrk_sha256": "27bf3f214da101518829ec450a476f4d81e60553f2e778a16888e42713fcd0b2",
+    "mrk_rows": 373,
+    "record_count_including_TES3": 48141,
+    "compiled_SCPT": 236
+  },
+  "script_compile": {
+    "source_SCPT_records": 238,
+    "unique_scripts": 236,
+    "messagebox_main": 413,
+    "messagebox_buttons": 359,
+    "addtopic": 105,
+    "translated_say": 128,
+    "unmatched_say": [],
+    "master_source_distribution": {
+      "Morrowind.esm": 152,
+      "Tribunal.esm": 39,
+      "Bloodmoon.esm": 45
+    },
+    "important_override_resolution": {
+      "CharGen_ring_keley": "Tribunal.esm",
+      "CavernIncarnateDoor": "Bloodmoon.esm",
+      "VampireCheck": "Bloodmoon.esm"
+    }
+  },
+  "mrk_audit": {
+    "rows": 373,
+    "ctrl_z_0x1A_count": 0,
+    "duplicate_topic_keys": 0,
+    "duplicate_keyword_values": 0,
+    "missing_DIAL_keys": 0,
+    "stale_keywords": 0
+  },
+  "classic_fixes": {
+    "FNAM_shortened": 33,
+    "Voice_Wilderness_ANAM_removed": 1,
+    "technical_ANAM_restored": 0,
+    "FACT_RNAM_converted": 204,
+    "display_subrecords_converted": 47089,
+    "cp949_fallbacks": {}
+  },
+  "checks": {
+    "RC6_ZIP_hash": true,
+    "RC6_ESP_hash": true,
+    "master_override_logic_match": true,
+    "source_SCPT_238": true,
+    "compiled_unique_SCPT_236": true,
+    "all_SCPT_SCDT": true,
+    "no_SCPT_SCTX": true,
+    "SCHD_size_matches": true,
+    "MessageBox_main_413": true,
+    "MessageBox_buttons_359": true,
+    "AddTopic_105": true,
+    "Say_128": true,
+    "Say_unmatched_zero": true,
+    "FNAM_short_33": true,
+    "FNAM_over32_zero": true,
+    "FACT_RNAM_32": true,
+    "Voice_Wilderness_zero": true,
+    "translated_technical_ANAM_zero": true,
+    "Processus_one_correct": true,
+    "MRK_373": true,
+    "MRK_ctrl_z_0": true,
+    "MRK_duplicate_topic_0": true,
+    "MRK_duplicate_keyword_0": true,
+    "MRK_missing_DIAL_0": true,
+    "MRK_stale_keyword_0": true,
+    "HEDR_count": true
+  }
+}
