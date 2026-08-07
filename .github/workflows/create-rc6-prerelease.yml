@@ -1,0 +1,65 @@
+name: Create RC6 Classic CP949 pre-release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/create-rc6-prerelease.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create RC6 pre-release if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG='v1.0.7-rc6-classic-cp949-pre1'
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release already exists: $TAG"
+            exit 0
+          fi
+          cat > /tmp/release-notes.md <<'EOF'
+          RC6 `MRK WINDOWS SAFE` 기반 Classic Morrowind CP949 시험판입니다.
+
+          OpenMW RC6 소스는 독립 정적 검증을 통과했습니다. MRK는 373행이며 `0x1A 0`, 중복 topic 0, 중복 keyword 0, stale keyword 0입니다. MRK에 안전하게 넣을 수 없었던 13개 토픽은 MRK에서 제외하고, 검수된 INFO 응답 26개 안에 실제 DIAL명을 직접 넣는 방식으로 복구되어 있습니다.
+
+          OpenMW 실게임에서 현재 확인된 표본은 다음과 같습니다.
+          - 금화 되찾기 링크
+          - 파르고스의 은닉처 링크 및 후속 선택지
+          - 그가 화내는 -> 그가 화내는 걸 봤다 링크
+
+          Classic CP949 RC6 통합판은 정적 검증 PASS이며 전체 런타임 회귀 테스트는 아직 진행 중입니다.
+
+          ## Classic 빌드 내용
+          - compiled SCPT 236개
+          - MessageBox 본문 413개 / 버튼 359개
+          - AddTopic 105개
+          - scripted Say 128개
+          - Windows-safe MRK 373행
+          - FNAM 32바이트 초과 33건 Classic 호환 처리
+          - Voice INFO `ANAM="Wilderness"` 문제 조건 제거
+          - 프로케수스 INFO 1개 및 `ANAM = Seyda Neen, Census and Excise Office` 유지
+
+          ## SHA-256
+          - RC6 source ZIP: `9bfe99f9e296c692ba15cee9540cc9de193d49dad6b5421a31a642da62c237f4`
+          - RC6 source ESP: `26da6c578d7136eb0e12f63d4e2d326cef2c10d7e4a148684c65136f753052e2`
+          - RC6 source MRK: `030bb6acb37f1d5718d0af7c4c49367f596dc95e7f75805113a5707bb69b675f`
+          - Classic ESP: `d876e2fd60b84380a3bca4750033ac6a36f776e173f5f2476433c66e519a9762`
+          - Classic MRK: `27bf3f214da101518829ec450a476f4d81e60553f2e778a16888e42713fcd0b2`
+          - MO2 ZIP: `f744692d151a65ff1718cbfaf858063aa7e4daaae2beefd05613b6af1b24eca2`
+
+          ## 우선 회귀 테스트
+          - 게임 시작 시 스크립트 재컴파일 경고 여부
+          - 지웁/시작부 경비병 Say 자막
+          - 시작부 MessageBox 및 버튼
+          - 세이다 닌의 파르고스/흐리스카르/프로케수스 관련 토픽
+          - 금화 되찾기 / 그가 화내는 걸 봤다 링크
+
+          MO2 ZIP asset은 별도로 첨부하세요.
+          EOF
+          gh release create "$TAG" --target main --title 'Morrowind Classic CP949 v1.0.7-rc6 Pre-release' --notes-file /tmp/release-notes.md --prerelease
