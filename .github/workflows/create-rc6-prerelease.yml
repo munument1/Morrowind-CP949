@@ -19,7 +19,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG='v1.0.7-rc6-classic-cp949-pre1'
-          if gh release view "$TAG" >/dev/null 2>&1; then
+          REPO="$GITHUB_REPOSITORY"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
             echo "Release already exists: $TAG"
             exit 0
           fi
@@ -62,4 +63,4 @@ jobs:
 
           MO2 ZIP asset은 별도로 첨부하세요.
           EOF
-          gh release create "$TAG" --target main --title 'Morrowind Classic CP949 v1.0.7-rc6 Pre-release' --notes-file /tmp/release-notes.md --prerelease
+          gh release create "$TAG" --repo "$REPO" --target main --title 'Morrowind Classic CP949 v1.0.7-rc6 Pre-release' --notes-file /tmp/release-notes.md --prerelease
