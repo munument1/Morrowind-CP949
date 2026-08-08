@@ -2,7 +2,8 @@
 """Add OpenMW Import-Wizard-compatible FNT aliases without touching TEX files.
 
 This script does not contain or generate font binaries. It only copies existing
-FNT files supplied by the user/package author and verifies byte identity.
+FNT files supplied by the user/package author and verifies byte identity plus the
+FNT-internal texture basename used by OpenMW.
 """
 
 from __future__ import annotations
@@ -24,6 +25,24 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def fnt_internal_name(path: Path) -> str:
+    """Read the 284-byte name buffer used by OpenMW's Morrowind FNT loader.
+
+    FNT layout relevant here:
+      float fontSize
+      int   one
+      int   one
+      char  nameBuffer[284]
+
+    Therefore nameBuffer starts at byte offset 12.
+    """
+    data = path.read_bytes()
+    if len(data) < 12 + 284:
+        raise ValueError(f"FNT too small: {path}")
+    raw = data[12 : 12 + 284].split(b"\0", 1)[0]
+    return raw.decode("ascii")
 
 
 def main() -> int:
@@ -52,6 +71,28 @@ def main() -> int:
             failures += 1
             continue
 
+        expected_internal = source.stem
+        try:
+            internal = fnt_internal_name(source)
+        except (ValueError, UnicodeDecodeError) as e:
+            print(f"FAIL invalid FNT header: {source_name}: {e}")
+            failures += 1
+            continue
+
+        if internal != expected_internal:
+            print(
+                f"FAIL unexpected internal FNT name: {source_name}: "
+                f"{internal!r} != {expected_internal!r}"
+            )
+            failures += 1
+            continue
+
+        texture = fonts_dir / f"{internal}.tex"
+        if not texture.is_file():
+            print(f"FAIL missing internal texture: {texture}")
+            failures += 1
+            continue
+
         if args.check:
             if not alias.is_file():
                 print(f"FAIL missing alias:  {alias}")
@@ -67,10 +108,23 @@ def main() -> int:
             failures += 1
             continue
 
-        print(f"PASS {alias_name} == {source_name}  sha256={src_hash}")
+        alias_internal = fnt_internal_name(alias)
+        if alias_internal != internal:
+            print(
+                f"FAIL alias internal name changed: {alias_name}: "
+                f"{alias_internal!r} != {internal!r}"
+            )
+            failures += 1
+            continue
 
-    # TEX aliases are intentionally not created. OpenMW reads the internal font
-    # name from the FNT header and opens Fonts/<internal-name>.tex.
+        print(
+            f"PASS {alias_name} == {source_name}  sha256={src_hash}  "
+            f"internal={internal}  texture={texture.name}"
+        )
+
+    # TEX aliases are intentionally not created. OpenMW loads Fonts/<requested>.fnt,
+    # then reads nameBuffer[284] from the FNT header and loads
+    # Fonts/<internal-name>.tex.
     if failures:
         return 1
 
