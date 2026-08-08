@@ -1,0 +1,79 @@
+name: Temporary RC6 font release upload
+
+on:
+  push:
+    branches:
+      - font-release-upload-temp-20260808
+    paths:
+      - '.github/workflows/upload-font-release-temp.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: v1.0.7-rc6-classic-cp949-pre1
+      REPO: ${{ github.repository }}
+      EXPECTED_SHA: 3a7d2442d43d7ed9e0b42d6d8d75068340b00893e06bb2fa696d4ac440bbeee7
+      ASSET: Morrowind_CP949_Classic_Fonts.zip
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find exact font pack already stored on GitHub
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/search
+          FOUND=''
+
+          # Current/older release assets.
+          gh api --paginate "repos/$REPO/releases?per_page=100" > /tmp/releases.json
+          mapfile -t urls < <(jq -r --arg n "$ASSET" '.[] | .assets[]? | select(.name==$n) | .browser_download_url' /tmp/releases.json)
+          for u in "${urls[@]}"; do
+            curl -fL -H "Authorization: Bearer $GH_TOKEN" -o /tmp/search/candidate.zip "$u" || continue
+            if echo "$EXPECTED_SHA  /tmp/search/candidate.zip" | sha256sum -c - >/dev/null 2>&1; then
+              FOUND=/tmp/search/candidate.zip
+              break
+            fi
+          done
+
+          # GitHub Actions artifacts.
+          if [[ -z "$FOUND" ]]; then
+            gh api --paginate "repos/$REPO/actions/artifacts?per_page=100" > /tmp/artifacts-pages.json
+            jq -s '{artifacts: [.[].artifacts[]?]}' /tmp/artifacts-pages.json > /tmp/artifacts.json
+            mapfile -t rows < <(jq -r '.artifacts[] | select(.expired==false) | [.id,.archive_download_url,.name] | @tsv' /tmp/artifacts.json)
+            for row in "${rows[@]}"; do
+              IFS=$'\t' read -r id u name <<< "$row"
+              rm -rf /tmp/search/artifact && mkdir -p /tmp/search/artifact
+              curl -fL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' -o /tmp/search/artifact.zip "$u" || continue
+              unzip -qq /tmp/search/artifact.zip -d /tmp/search/artifact || continue
+              while IFS= read -r -d '' f; do
+                if echo "$EXPECTED_SHA  $f" | sha256sum -c - >/dev/null 2>&1; then
+                  cp "$f" /tmp/search/exact.zip
+                  FOUND=/tmp/search/exact.zip
+                  break 2
+                fi
+              done < <(find /tmp/search/artifact -type f -name "$ASSET" -print0)
+            done
+          fi
+
+          if [[ -z "$FOUND" ]]; then
+            echo 'Exact SHA font pack was not found in existing GitHub storage.' >&2
+            exit 44
+          fi
+          cp "$FOUND" "/tmp/$ASSET"
+          echo "$EXPECTED_SHA  /tmp/$ASSET" | sha256sum -c -
+
+      - name: Upload exact asset to current pre-release
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" "/tmp/$ASSET" --clobber --repo "$REPO"
+          gh release view "$TAG" --repo "$REPO" --json assets --jq '.assets[] | select(.name==env.ASSET) | .name'

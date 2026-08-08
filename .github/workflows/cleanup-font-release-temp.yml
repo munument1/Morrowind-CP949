@@ -1,0 +1,36 @@
+name: Cleanup temporary RC6 font release branch
+
+on:
+  push:
+    branches:
+      - font-release-upload-temp-20260808
+    paths:
+      - '.github/workflows/cleanup-font-release-temp.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-clean:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      TAG: v1.0.7-rc6-classic-cp949-pre1
+      TEMP_BRANCH: font-release-upload-temp-20260808
+      ASSET: Morrowind_CP949_Classic_Fonts.zip
+      EXPECTED_SHA: 3a7d2442d43d7ed9e0b42d6d8d75068340b00893e06bb2fa696d4ac440bbeee7
+    steps:
+      - name: Verify release asset exact SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://github.com/$REPO/releases/download/$TAG/$ASSET"
+          curl -fL -o "/tmp/$ASSET" "$url"
+          echo "$EXPECTED_SHA  /tmp/$ASSET" | sha256sum -c -
+
+      - name: Remove temporary branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method DELETE "repos/$REPO/git/refs/heads/$TEMP_BRANCH"
