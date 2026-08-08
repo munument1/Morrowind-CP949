@@ -22,20 +22,22 @@ OpenMW RC6 소스에서 실게임으로 확인된 토픽 표본:
 - Morrowind 1.6.0.1820
 - Morrowind.esm / Tribunal.esm / Bloodmoon.esm 활성화
 - 지원되는 MCP 기반 `Morrowind.exe`에 CP949 패치 적용
-- `tools/build_classic_cp949_fonts.py`로 생성한 CP949 bitmap font 설치
+- Release의 **사전 생성 Classic CP949 폰트팩** 설치
 - RC6 번역 MO2 패키지 설치
 - 이전 한국어 번역 ESP 시험판 비활성화
 - `Morrowind_Korean_ReTranslation_v1.0.7-rc6_Classic_CP949.esp` 활성화
 
-## 폰트 독립성 테스트
+## 폰트 clean-install 테스트
 
-기존 테스트 PC에 예전 한글 폰트가 남아 있으면 신규 사용자 문제를 놓칠 수 있습니다. 최소 한 번은 기존 한글 폰트를 제거/비활성화한 상태에서 다음을 확인합니다.
+기존 테스트 PC에 예전 한글 폰트가 남아 있으면 신규 사용자 문제를 놓칠 수 있습니다. 최소 한 번은 기존 별도 한글 폰트를 제거/비활성화하고, **Release에 배포할 사전 생성 폰트팩만** 사용해 다음을 확인합니다.
 
-- [ ] 원본 Morrowind Fonts + 사용자가 준비한 한국어 TTF만으로 폰트 빌더가 성공한다.
-- [ ] `font_build_manifest.json`에서 현대 한글 coverage가 11,172자로 기록된다.
-- [ ] 생성 폰트 모드만 활성화했을 때 메뉴/대화 한글이 표시된다.
+- [ ] 폰트 생성 스크립트를 실행하지 않고 사전 생성 폰트팩 ZIP만 설치한다.
+- [ ] 메뉴/대화/MessageBox에 한글이 정상 표시된다.
 - [ ] 기존 별도 한글 폰트 모드를 비활성화해도 결과가 동일하다.
 - [ ] `Morrowind.ini`의 기존 폰트 이름을 수동 변경할 필요가 없다.
+- [ ] 폰트팩 제거 시 한글 글리프가 사라지는 것으로 해당 폰트팩이 실제로 사용됨을 확인한다.
+
+`tools/build_classic_cp949_fonts.py` 검증은 별도 **개발/재현 테스트**이며 일반 사용자 설치 절차의 필수 항목이 아닙니다.
 
 ## 우선 확인
 
@@ -70,7 +72,7 @@ OpenMW RC6 소스에서 실게임으로 확인된 토픽 표본:
 - `Warnings.txt` 관련 부분
 - MO2 플러그인 순서
 - 사용한 ESP SHA-256
-- 폰트 빌더의 `font_build_manifest.json`
+- 사용한 폰트팩 asset 이름과 SHA-256
 
 현재 RC6 Classic ESP SHA-256:
 
