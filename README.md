@@ -5,23 +5,49 @@ Classic **The Elder Scrolls III: Morrowind 1.6.0.1820**에서 한국어를 표�
 > [!WARNING]
 > 현재 **Pre-release / 런타임 회귀 테스트 단계**입니다. CP949 한글 렌더링과 초기 compiled `Say` 방식은 실제 Classic 게임에서 동작을 확인했습니다. 현재 후보인 **v1.0.7-rc6 Classic CP949 전체 통합판은 정적 검증 PASS이며, Classic 전체 회귀 테스트는 아직 진행 중**입니다.
 
-## Classic에서 한글이 나오려면 세 가지가 모두 필요합니다
+## Classic 사용자 설치 정책
+
+Classic에서 한글을 표시하려면 다음 세 요소가 모두 필요합니다.
 
 1. **CP949 대응 실행 파일** — `tools/patch_morrowind_cp949.py`
-2. **CP949 bitmap font** — `tools/build_classic_cp949_fonts.py`
+2. **CP949 bitmap font** — 정식 배포에서는 사전 생성된 FNT/TEX 폰트팩을 Release asset으로 제공
 3. **CP949 번역 ESP** — 현재 RC6 Classic MO2 패키지
 
-실행 파일 패치는 CP949 바이트를 올바른 DBCS 글리프 위치로 해석하게 만들 뿐입니다. 실제 한글 모양은 FNT/TEX bitmap font가 제공합니다. 따라서 **폰트가 없는 깨끗한 설치에서 번역 ZIP과 EXE 패처만 적용하면 한글이 정상 표시되지 않습니다.**
+실행 파일 패치는 CP949 바이트를 올바른 DBCS 글리프 위치로 해석하게 만들 뿐이고, 실제 한글 모양은 FNT/TEX bitmap font가 제공합니다.
 
-이 저장소는 폰트 바이너리를 배포하지 않습니다. 대신 사용자가 가진 원본 Morrowind 폰트와 사용자가 별도로 준비한 한국어 TTF에서 Classic용 FNT/TEX를 재현하는 빌더를 제공합니다.
+프로젝트 정책은 **일반 사용자에게 폰트 생성 스크립트 실행을 요구하지 않는 것**입니다. 정식/사용자용 배포에서는 사전 생성한 Classic CP949 폰트팩을 번역 ZIP과 함께 별도 Release asset으로 제공하는 방식을 기본으로 합니다.
 
-자세한 절차: [`CLASSIC_FONT_SETUP.md`](CLASSIC_FONT_SETUP.md)
+`tools/build_classic_cp949_fonts.py`는 삭제하지 않고 **재현·개발·커스텀 글꼴용 선택 도구**로 유지합니다. 일반 설치에는 필수가 아닙니다.
+
+자세한 내용: [`CLASSIC_FONT_SETUP.md`](CLASSIC_FONT_SETUP.md)
+
+## 현재 RC6 배포 상태
+
+현재 테스트 대상 태그:
+
+```text
+v1.0.7-rc6-classic-cp949-pre1
+```
+
+번역 asset:
+
+```text
+Morrowind_Korean_ReTranslation_v1.0.7-rc6_Classic_CP949_MO2.zip
+```
+
+깨끗한 신규 설치를 완결하려면 여기에 **사전 생성 Classic CP949 폰트팩 asset**도 함께 있어야 합니다. 폰트팩 asset이 아직 보이지 않는 시점의 RC6 Pre-release는 기존 테스트용 폰트를 이미 가진 환경에서는 사용할 수 있지만, clean install 배포는 완결된 상태가 아닙니다.
+
+권장 폰트팩 asset 이름:
+
+```text
+Morrowind_CP949_Classic_Fonts.zip
+```
 
 ## 현재 후보: v1.0.7-rc6
 
 기준 소스는 **Morrowind Korean ReTranslation v1.0.7-rc6 MRK WINDOWS SAFE**입니다.
 
-RC6 OpenMW 소스에서 현재 실게임으로 확인된 토픽 표본:
+RC6 OpenMW 소스에서 실게임으로 확인된 토픽 표본:
 
 - `금화 되찾기` 링크
 - `파르고스의 은닉처` 링크 및 후속 선택지
@@ -88,42 +114,17 @@ c3585b91741689057c18ff86a1c3381d47278cd1d81443d38ed3b179c2fa1cd8  MCP Japanese l
 python tools/patch_morrowind_cp949.py Morrowind.exe Morrowind.MCP-Korean-Pilot.exe
 ```
 
-## Classic CP949 폰트 생성
+## 폰트팩과 재현 빌더
 
-필요한 Python 패키지:
+일반 사용자는 Release에 첨부된 사전 생성 폰트팩을 설치하는 것이 기본입니다. 폰트팩은 Classic이 기대하는 기존 `Morrowind.ini` 폰트 이름을 그대로 사용하며, 사용자가 INI를 직접 수정하지 않는 것을 기준으로 합니다.
 
-```bash
-python -m pip install -r tools/requirements-fonts.txt
-```
-
-예시:
-
-```bash
-python tools/build_classic_cp949_fonts.py \
-  --vanilla-fonts "C:/Games/Morrowind/Data Files/Fonts" \
-  --ttf "C:/Fonts/KoreanFont.ttf" \
-  --output "build/Classic_CP949_Fonts"
-```
-
-빌더는 원본 single-byte 글리프를 보존하고 2048×2048 TEX에 CP949용 8×11 DBCS grid를 추가하며, FNT `0xFF` slot을 실행 파일 패치가 사용하는 template으로 설정합니다. 현대 한글 11,172자 coverage와 대표 셀 위치를 검증하고 SHA-256 manifest를 생성합니다.
-
-개발 환경에서 이 빌더의 네 FNT는 과거 런타임 확인 Pilot의 네 FNT와 **바이트 단위 동일**하게 재현됐습니다. TEX 픽셀은 사용자가 선택한 TTF에 따라 달라집니다.
-
-## Pre-release
-
-현재 테스트 대상 태그:
+재현·개발·커스텀 글꼴이 필요한 경우에만 다음 도구를 사용합니다.
 
 ```text
-v1.0.7-rc6-classic-cp949-pre1
+tools/build_classic_cp949_fonts.py
 ```
 
-현재 RC6 Classic 산출물:
-
-```text
-Morrowind_Korean_ReTranslation_v1.0.7-rc6_Classic_CP949_MO2.zip
-```
-
-이 ZIP에는 **ESP / MRK / README만** 들어 있으며 실행 파일과 폰트 바이너리는 포함하지 않습니다. 따라서 신규 설치자는 위의 EXE 패처와 폰트 빌더도 함께 사용해야 합니다.
+이 빌더는 원본 single-byte atlas를 보존하고 2048×2048 TEX에 CP949용 8×11 DBCS grid를 추가합니다. 개발 환경에서 생성된 네 FNT는 과거 런타임 확인 Pilot FNT와 바이트 단위 동일하게 재현됐습니다.
 
 ## SHA-256
 
@@ -140,10 +141,10 @@ f744692d151a65ff1718cbfaf858063aa7e4daaae2beefd05613b6af1b24eca2  Deterministic 
 
 ## 설치 순서
 
-1. Morrowind GOTY 1.6.0.1820과 `Morrowind.esm`, `Tribunal.esm`, `Bloodmoon.esm` 준비
+1. Morrowind GOTY 1.6.0.1820 준비
 2. 지원되는 MCP 상태의 자신의 `Morrowind.exe`에 CP949 패치 적용
-3. `build_classic_cp949_fonts.py`로 CP949 bitmap font 생성 후 별도 MO2 모드로 설치
-4. RC6 Classic MO2 ZIP 설치
+3. Release의 **사전 생성 Classic CP949 폰트팩** 설치
+4. RC6 Classic 번역 MO2 ZIP 설치
 5. `Morrowind_Korean_ReTranslation_v1.0.7-rc6_Classic_CP949.esp` 활성화
 6. 이전 한국어 번역 ESP 시험판 비활성화
 
@@ -151,6 +152,7 @@ Classic 쪽에서는 `Morrowind.ini` 폰트 이름을 바꾸지 않는 것이 �
 
 ## 우선 회귀 테스트
 
+- clean install + 사전 생성 폰트팩만으로 한글 표시
 - 게임 시작 시 `Script in file ... compiled.` 경고 여부
 - 지웁 및 시작부 경비병 `Say` 자막
 - 시작부 `MessageBox` 본문/버튼
@@ -168,7 +170,8 @@ OpenMW 쪽은 글로벌 기본 `MysticCards / DemonicLetters`와 Import Wizard �
 
 - Bethesda의 `Morrowind.exe` 원본/수정본
 - 게임 원본 ESM
-- 폰트 바이너리
+
+폰트는 프로젝트 배포 정책상 **사전 생성 사용자용 폰트팩으로 배포하는 것을 기본 경로**로 둡니다.
 
 ## Status
 
